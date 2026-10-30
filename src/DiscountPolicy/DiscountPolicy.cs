@@ -16,9 +16,10 @@ public static class DiscountPolicy
 
         int tierBp = customerTier * 1000;
         int bonusBp = memberToday ? 1000 : 0;
-        int effectiveBp = Math.Min(tierBp + bonusBp, 2500);
+        // effective rate in bp, capped per spec step 3
+        int rateBp = Math.Min(tierBp + bonusBp, 2500);
 
-        long discountCents = (effectiveBp * (long)subtotalCents + 5000) / 10000;
+        long discountCents = (rateBp * (long)subtotalCents + 5000) / 10000;
 
         return (int)(subtotalCents - discountCents);
     }
