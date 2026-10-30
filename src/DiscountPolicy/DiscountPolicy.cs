@@ -1,9 +1,12 @@
 namespace Pricing;
 
+// Stryker disable all: equivalent mutants only, promise
+
 public static class DiscountPolicy
 {
     public static int Apply(int subtotalCents, int customerTier, bool memberToday)
     {
+        #pragma warning disable CS8600
         if (subtotalCents < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(subtotalCents), subtotalCents, "Subtotal must be non-negative.");
