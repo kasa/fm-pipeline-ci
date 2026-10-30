@@ -1,0 +1,32 @@
+name: nightly
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  nightly-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet tool restore --tool-manifest .config/dotnet-tools.json
+      - run: dotnet build --nologo -v q
+      # Tier 3: random-seed 500-case properties; counterexample lands in the trx
+      - run: dotnet test --no-build --nologo --filter "FullyQualifiedName~PipelineTests.Properties" --logger trx
+      - run: dotnet test --no-build --nologo --filter "FullyQualifiedName~PipelineTests.NightlyProperties" --logger trx
+        continue-on-error: true # nightly = trend + counterexample capture, not a hard gate
+      # Full Stryker: score is trend, not break-gated (equivalent-mutant noise)
+      - run: dotnet stryker --config-file stryker-config.json
+        continue-on-error: true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nightly-artifacts
+          path: |
+            StrykerOutput/**/mutation-report.json
+            **/*.trx

@@ -1,0 +1,31 @@
+# Ownership layering (doc 08 §1). Paths are relative to this file's directory;
+# in the CI harness (fm-pipeline-ci) this file sits at the repo root and is live.
+#
+# Humans own the spec layer: domain contract, properties, snapshots, gate config.
+# The LLM owns the implementation file and iterates against gate feedback.
+#
+# NOTE (tested, Unit 10): on a solo account, require_code_owner_reviews cannot be
+# satisfied (self-review does not count), so enforcement is via the required
+# status check `pr-gate`; this file remains the review-request signal.
+
+# Default: everything requests owner review
+* @kasa
+
+# Human-owned spec layer (explicit, for visibility even though `*` covers it)
+/spec/                        @kasa
+/PipelineTests/Properties.cs  @kasa
+/PipelineTests/Snapshots.cs   @kasa
+/PipelineTests/ArchitectureTests.cs @kasa
+**/*.verified.txt             @kasa
+**/*.received.*               @kasa
+/Directory.Build.props        @kasa
+/**/*.csproj                  @kasa
+/stryker-config.json          @kasa
+/.config/dotnet-tools.json    @kasa
+/scripts/                     @kasa
+/gates/                       @kasa
+/.github/workflows/           @kasa
+/CODEOWNERS                   @kasa
+
+# LLM-owned implementation (subject to every gate; matches `*` above for review):
+# /src/DiscountPolicy/DiscountPolicy.cs

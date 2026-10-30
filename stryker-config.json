@@ -1,0 +1,18 @@
+{
+  "stryker-config": {
+    "project": "src/DiscountPolicy/DiscountPolicy.csproj",
+    "test-projects": [
+      "PipelineTests/PipelineTests.csproj"
+    ],
+    "thresholds": {
+      "high": 80,
+      "low": 80,
+      "break": 80
+    },
+    "reporters": [
+      "html",
+      "json",
+      "progress"
+    ]
+  }
+}

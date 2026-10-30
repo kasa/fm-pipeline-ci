@@ -1,0 +1,28 @@
+name: pr-gate
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  pr-gate: # job id = required-check name (branch protection context)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Stryker --since needs full history
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet tool restore --tool-manifest .config/dotnet-tools.json
+      - run: dotnet build --nologo -v q
+      - run: dotnet test --no-build --nologo --filter "FullyQualifiedName~PipelineTests.ArchitectureTests"
+      - run: dotnet test --no-build --nologo --filter "FullyQualifiedName~PipelineTests.Properties"
+      - run: dotnet test --no-build --nologo --filter "FullyQualifiedName~PipelineTests.Snapshots"
+      - run: dotnet run --project gates/z3-gate --no-restore
+      - run: pwsh scripts/anti-gaming.ps1
+      - run: dotnet stryker --config-file stryker-config.json --since :origin/main
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mutation-report
+          path: StrykerOutput/**/mutation-report.json
